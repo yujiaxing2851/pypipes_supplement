@@ -9,6 +9,10 @@
 #   MIT License Copyright (c) 2022 ZENULI
 """
 
+"""
+expand 2d generation to 3d space
+"""
+
 import sys
 sys.path.append('../PyPipes')
 

@@ -20,6 +20,12 @@ class PartType(Enum):
     TEE_2=9
     CROSS_2=10
 
+    ANGLE_3=11
+    # TEE_3=12
+    CROSS_3=13
+
+    # PIPE_5=14
+
     # 在各轴上的长度
     def distance_per_axis(self) -> dict:
         if self == self.ANGLE:
@@ -42,6 +48,10 @@ class PartType(Enum):
             return {'x': 1.286665, 'y': 1.286665, 'z': 0.5}
         elif self == self.CROSS_2:
             return {'x': 1.06615, 'y': 1.286665, 'z': 0.5}
+        elif self == self.ANGLE_3:
+            return {'x': 0.5, 'y': 1.21041, 'z': 1.21041}
+        elif self == self.CROSS_3:
+            return {'x': 0.5, 'y': 1.286665, 'z': 1.06615}
 
     def connections_per_axis(self) -> list:
         if self == self.ANGLE:
@@ -56,6 +66,10 @@ class PartType(Enum):
             return ["-x","y","-y"]
         elif self == self.CROSS_2:
             return ["x","-x","y","-y"]
+        elif self == self.ANGLE_3:
+            return ["y","-z"]
+        elif self == self.CROSS_3:
+            return ["y","-y","z","-z"]
         else:
             return ["z", "-z"]
 
@@ -79,10 +93,13 @@ class PartType(Enum):
         elif self == self.ANGLE_2:
             return resource_dir / "coude2.ply"
         elif self == self.TEE_2:
-            return resource_dir / "te2.plt"
+            return resource_dir / "te2.ply"
         elif self == self.CROSS_2:
             return resource_dir / "cross2.ply"
-
+        elif self == self.ANGLE_3:
+            return resource_dir / "coude3.ply"
+        elif self == self.CROSS_3:
+            return resource_dir / "cross3.ply"
 
 
 class EnumEncoder(json.JSONEncoder):
@@ -102,17 +119,45 @@ def as_part_type(d):
         return d
 
 
-def random_part_type() -> PartType:
-    score = random.randrange(0, 120)
-
-    if 0 <= score < 40:
-        return PartType.ANGLE
-    elif 40 <= score < 80:
-        return PartType.TEE
-    elif 80 <= score < 100:
-        return PartType.CROSS
-    elif 100 <=score <120:
-        return PartType.PIPE_1
+def random_part_type(type) -> PartType:
+    if 'x' in type:
+        score = random.randrange(0, 120)
+        if 0 <= score < 20:
+            return PartType.ANGLE
+        elif 20 <= score < 40:
+            return PartType.ANGLE_2
+        elif 40 <= score < 60:
+            return PartType.TEE
+        elif 60 <= score < 80:
+            return PartType.TEE_2
+        elif 80 <= score < 100:
+            return PartType.CROSS
+        elif 100 <= score < 120:
+            return PartType.CROSS_2
+    elif 'y' in type:
+        score = random.randrange(0, 100)
+        if 0 <= score < 20:
+            return PartType.ANGLE_2
+        elif 20 <= score < 40:
+            return PartType.ANGLE_3
+        elif 40 <= score < 60:
+            return PartType.TEE_2
+        elif 60 <= score < 80:
+            return PartType.CROSS_2
+        elif 80 <= score < 100:
+            return PartType.CROSS_3
+    elif 'z' in type:
+        score = random.randrange(0, 100)
+        if 0 <= score < 20:
+            return PartType.ANGLE
+        elif 20 <= score < 40:
+            return PartType.ANGLE_3
+        elif 40 <= score < 60:
+            return PartType.TEE
+        elif 60 <= score < 80:
+            return PartType.CROSS
+        elif 80 <= score < 100:
+            return PartType.CROSS_3
 
 
 def random_pipe_type() -> PartType:

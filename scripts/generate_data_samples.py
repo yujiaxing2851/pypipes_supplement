@@ -26,8 +26,8 @@ from src.pipeline_constructor.PipelineConstructor import PipelineConstructor
 
 # PARAMETERS TO MODIFY
 nb_models = 30
-nb_min_part = 5
-nb_max_part = 15
+nb_min_part = 100
+nb_max_part = 500
 nb_points_per_mesh = 128
 save_path = 'resources/results'
 

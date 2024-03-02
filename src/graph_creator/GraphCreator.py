@@ -39,13 +39,12 @@ class GraphCreator:
         direction = np.asarray([0, 0, 0])
         radius = 1
 
-        part_type = random_part_type()
+        part_type = random_part_type('x')
 
         part_index = 0
         nb_pipes = 0
 
         part = PipelinePart(part_type, coordinate, direction, radius)
-
         graph.add_node(part_index, part)
 
         last_coordinate = coordinate
@@ -53,6 +52,7 @@ class GraphCreator:
         connections = last_part_type.connections_per_axis()
 
         bounding_boxes = [pipeline_constructor.create_mesh_from_part(part).get_axis_aligned_bounding_box()]
+
         # 可视化
         # axis=o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
         # o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(part),axis])
@@ -60,7 +60,7 @@ class GraphCreator:
         end_parts = []
 
         for connection in connections:
-            pipe, new_part = self.create_part_and_pipe_for_connection(connection, last_coordinate, last_part_type)
+            pipe, new_part, anchor_rotation = self.create_part_and_pipe_for_connection(connection, last_coordinate, last_part_type)
 
             part_index += 1
             graph.add_node(part_index, pipe)
@@ -82,13 +82,14 @@ class GraphCreator:
             graph.add_node(part_index, new_part)
             graph.add_edge(part_index - 1, part_index)
 
-            end_parts.append((new_part, connection))
+            end_parts.append((new_part, connection, anchor_rotation))
 
         while len(end_parts) != 0:
             last_part_tuple = end_parts.pop(0)
 
             next_part = last_part_tuple[0]
             last_connection = last_part_tuple[1]
+            anchor=last_part_tuple[2]
             # 对于new_part，连接方向与connection反向
             occupied_connection = self.opposite_connection(last_connection)
 
@@ -98,19 +99,26 @@ class GraphCreator:
             connections = last_part_type.connections_per_axis()
 
             for connection in connections:
-                # 如果上一个部件进行过旋转，那么其connection会发生变化
-                if (last_direction[1] != 0 and "x" in connection) or \
-                        (last_direction[2] != 0 and "y" in connection) or \
-                        (last_direction[0] != 0 and "z" in connection):
-                    connection = self.opposite_connection(connection)
+                # 如果上一个部件进行过旋转，那么其connection会发生变化，这里修改为通过anchor判断旋转
+                # if (last_direction[1] != 0 and "x" in connection) or \
+                #         (last_direction[2] != 0 and "y" in connection) or \
+                #         (last_direction[0] != 0 and "z" in connection):
+                if anchor in "xyz":
+                    if connection not in anchor:
+                        connection = self.opposite_connection(connection)
 
                 if connection == occupied_connection:
                     continue
 
-                pipe, new_part = self.create_part_and_pipe_for_connection(connection, last_coordinate, last_part_type)
+                pipe, new_part,anchor_rotation = self.create_part_and_pipe_for_connection(connection, last_coordinate, last_part_type)
 
                 pipe_bounding_box = pipeline_constructor.create_mesh_from_part(pipe).get_axis_aligned_bounding_box()
                 part_bounding_box = pipeline_constructor.create_mesh_from_part(new_part).get_axis_aligned_bounding_box()
+
+                # 可视化
+                # axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+                # o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(pipe),
+                #                                    pipeline_constructor.create_mesh_from_part(new_part), axis])
 
                 pipe_intersects = False
                 part_intersects = False
@@ -138,7 +146,7 @@ class GraphCreator:
                     graph.add_edge(part_index - 1, part_index)
                     bounding_boxes.append(part_bounding_box)
 
-                    end_parts.append((new_part, connection))
+                    end_parts.append((new_part, connection,anchor_rotation))
 
         return graph
 
@@ -158,7 +166,7 @@ class GraphCreator:
 
     def create_part_and_pipe_for_connection(self, connection, last_coordinate, last_part_type):
         pipe_type = random_pipe_type()
-        destination_part_type = random_part_type()
+        destination_part_type = random_part_type(connection)
 
         by_axis_origin = last_part_type.distance_per_axis()
         by_axis_pipe = pipe_type.distance_per_axis()
@@ -172,19 +180,23 @@ class GraphCreator:
         fixed_connection = connection
         destination_connections = destination_part_type.connections_per_axis()
 
-        # 如果两个部件同向，需要旋转180度才能拼接，如果存在反向就不需要旋转
+        # 如果两个部件同向，需要旋转180度才能拼接，如果存在反向就不需要旋转，但是拐弯也可以转90度
+        anchor_rotation="none"
         if connection in destination_connections \
                 and self.opposite_connection(connection) not in destination_connections:
             if "x" in fixed_connection:
-                new_part_direction[1] = np.pi / 2 if destination_part_type == PartType.ANGLE else np.pi
+                anchor_rotation="y"
+                new_part_direction[1] = np.pi
             elif "y" in fixed_connection:
+                anchor_rotation="z"
                 new_part_direction[2] = np.pi
             elif "z" in fixed_connection:
+                anchor_rotation="x"
                 new_part_direction[0] = np.pi
 
         distance_factor = -1 if "-" in fixed_connection else 1
 
-        # 计算管道和部件新的坐标
+        # 计算管道和部件新的坐标，这里fixed_connection只包含单一方向
         if "x" in fixed_connection:
             distance = distance_factor * (by_axis_origin["x"] + (by_axis_pipe["z"] * 2) + by_axis_destination["x"])
             new_part_coordinates[0] = new_part_coordinates[0] + distance
@@ -206,7 +218,7 @@ class GraphCreator:
         pipe = PipelinePart(pipe_type, pipe_coordinates, pipe_direction, 1)
         new_part = PipelinePart(destination_part_type, new_part_coordinates, new_part_direction, 1)
 
-        return pipe, new_part
+        return pipe, new_part,anchor_rotation
 
     def build_graph(self, point_cloud: PointCloud) -> PipelineGraph:
         assert point_cloud.is_classified()

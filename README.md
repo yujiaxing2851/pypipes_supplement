@@ -2,6 +2,20 @@
 
 **[Paper](https://doi.org/10.1016/j.gmod.2020.101079)** | **[Master Degree website](https://departement-informatique.univ-tlse3.fr/master-igai/)** 
 
+**My supplement**:expand the generation in 2d to 3d space
+
+initial pipes:
+
+<img src="docs/source/_static/img/pipe2d.jpg" alt="drawing" height="200"/>
+
+modified pipes:
+
+<img src="docs/source/_static/img/pipe3d.png" alt="drawing" height="200"/>
+
+segmented pipes:
+
+<img src="docs/source/_static/img/pipe_segment.png" alt="drawing" height="200"/>
+
 
 **This project** is a [PyTorch](https://pytorch.org/) implementation of *DeepPipes: Learning 3D pipelines reconstruction from point clouds. Lili Cheng, Zhuo Wei, Mingchao Sun, Shiqing Xin, Andrei Sharf, Yangyan Li, Baoquan Chen, Changhe Tu. Graphical Models, Volume 111, 2020,*. 
 

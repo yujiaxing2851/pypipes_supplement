@@ -53,9 +53,9 @@ class GraphCreator:
         connections = last_part_type.connections_per_axis()
 
         bounding_boxes = [pipeline_constructor.create_mesh_from_part(part).get_axis_aligned_bounding_box()]
-
-        axis=o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
-        o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(part),axis])
+        # 可视化
+        # axis=o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+        # o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(part),axis])
 
         end_parts = []
 
@@ -70,9 +70,10 @@ class GraphCreator:
             bounding_boxes.append(pipeline_constructor.create_mesh_from_part(pipe).get_axis_aligned_bounding_box())
             bounding_boxes.append(pipeline_constructor.create_mesh_from_part(new_part).get_axis_aligned_bounding_box())
 
-            axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
-            o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(pipe),
-                                              pipeline_constructor.create_mesh_from_part(new_part), axis])
+            # 可视化
+            # axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+            # o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(pipe),
+            #                                   pipeline_constructor.create_mesh_from_part(new_part), axis])
 
             if part_index - nb_pipes >= nb_parts:
                 return graph

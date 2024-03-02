@@ -16,6 +16,10 @@ class PartType(Enum):
     PIPE_3 = 6
     PIPE_4 = 7
 
+    ANGLE_2=8
+    TEE_2=9
+    CROSS_2=10
+
     # 在各轴上的长度
     def distance_per_axis(self) -> dict:
         if self == self.ANGLE:
@@ -32,6 +36,12 @@ class PartType(Enum):
             return {'x': 0.5, 'y': 0.5, 'z': 5.6493}
         elif self == self.PIPE_4:
             return {'x': 0.5, 'y': 0.5, 'z': 2.97334}
+        elif self == self.ANGLE_2:
+            return {'x': 1.21041, 'y': 1.21041, 'z': 0.5}
+        elif self == self.TEE_2:
+            return {'x': 1.286665, 'y': 1.286665, 'z': 0.5}
+        elif self == self.CROSS_2:
+            return {'x': 1.06615, 'y': 1.286665, 'z': 0.5}
 
     def connections_per_axis(self) -> list:
         if self == self.ANGLE:
@@ -40,6 +50,12 @@ class PartType(Enum):
             return ["-x", "z", "-z"]
         elif self == self.CROSS:
             return ["x", "-x", "z", "-z"]
+        elif self == self.ANGLE_2:
+            return ["x","y"]
+        elif self == self.TEE_2:
+            return ["-x","y","-y"]
+        elif self == self.CROSS_2:
+            return ["x","-x","y","-y"]
         else:
             return ["z", "-z"]
 
@@ -60,6 +76,13 @@ class PartType(Enum):
             return resource_dir / "pipe3.ply"
         elif self == self.PIPE_4:
             return resource_dir / "pipe4.ply"
+        elif self == self.ANGLE_2:
+            return resource_dir / "coude2.ply"
+        elif self == self.TEE_2:
+            return resource_dir / "te2.plt"
+        elif self == self.CROSS_2:
+            return resource_dir / "cross2.ply"
+
 
 
 class EnumEncoder(json.JSONEncoder):
@@ -80,7 +103,7 @@ def as_part_type(d):
 
 
 def random_part_type() -> PartType:
-    score = random.randrange(0, 100)
+    score = random.randrange(0, 120)
 
     if 0 <= score < 40:
         return PartType.ANGLE
@@ -88,6 +111,8 @@ def random_part_type() -> PartType:
         return PartType.TEE
     elif 80 <= score < 100:
         return PartType.CROSS
+    elif 100 <=score <120:
+        return PartType.PIPE_1
 
 
 def random_pipe_type() -> PartType:

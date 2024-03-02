@@ -59,14 +59,27 @@ class TrainingModel:
             pipeline_constructor = PipelineConstructor()
 
             all_points = []
-
+            npy_all_points=np.empty((0, 6))
+            all_labels = []
             for node in pipeline_graph.graph.nodes:
                 part_type = pipeline_graph.graph.nodes[node]['type']
+
+                if 1 <= part_type.value <= 3:
+                    all_labels = np.concatenate([all_labels, np.full(nb_points_per_mesh, 0)])
+                elif 4 <= part_type.value <= 5:
+                    all_labels = np.concatenate([all_labels, np.full(nb_points_per_mesh, 1)])
+                elif 6 <= part_type.value <= 8:
+                    all_labels = np.concatenate([all_labels, np.full(nb_points_per_mesh, 2)])
+                elif 9 <= part_type.value <= 12:
+                    all_labels = np.concatenate([all_labels, np.full(nb_points_per_mesh, 3)])
+
                 coordinates = pipeline_graph.graph.nodes[node]['coordinates']
                 direction = pipeline_graph.graph.nodes[node]['direction']
 
                 mesh = pipeline_constructor.create_mesh(part_type, coordinates, direction)
                 point_cloud = mesh.sample_points_uniformly(nb_points_per_mesh)
+                full_points=np.hstack((np.asarray(point_cloud.points), np.ones_like(np.asarray(point_cloud.points))))
+                npy_all_points=np.vstack((npy_all_points, full_points))
 
                 for point in point_cloud.points:
                     label_point = Point(point[0], point[1], point[2])
@@ -80,6 +93,12 @@ class TrainingModel:
 
                 self._point_cloud_model += point_cloud
                 self._mesh += mesh
+
+            zeros=np.zeros(all_labels.shape[0])
+            all_labels=np.stack((all_labels,zeros),axis=0)
+            all_labels=all_labels.astype(int)
+            self.all_labels=all_labels
+            self.npy_all_points=npy_all_points
 
             self._point_cloud_unlabelled = PointCloud(all_points)
             self._point_cloud_labelled = PointCloud(deepcopy(all_points))
@@ -105,11 +124,16 @@ class TrainingModel:
     def visualize(self):
         o3d.visualization.draw_geometries([self._point_cloud_model])
 
-    def save_mesh(self,file_path: str) -> None:
+    def save_mesh(self, file_path: str) -> None:
         o3d.io.write_triangle_mesh(file_path, self._mesh)
 
-    def save_pcd(self,file_path: str) -> None:
+    def save_pcd(self, file_path: str) -> None:
         o3d.io.write_point_cloud(file_path, self._point_cloud_model)
+
+    def save_file(self, npy_path: str,bin_path: str) -> None:
+        np.save(npy_path,self.npy_all_points)
+        with open(bin_path, 'wb') as f:
+            np.save(f, self.all_labels.astype(np.uint16))
 
     def save_model(self, file_path: str) -> None:
         data = []

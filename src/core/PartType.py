@@ -8,21 +8,21 @@ import numpy as np
 class PartType(Enum):
 
     ANGLE = 1
-    TEE = 2
-    CROSS = 3
+    ANGLE_2=2
+    ANGLE_3=3
 
-    PIPE_1 = 4
-    PIPE_2 = 5
-    PIPE_3 = 6
-    PIPE_4 = 7
+    TEE = 4
+    TEE_2=5
+    CROSS = 6
+    CROSS_2=7
+    CROSS_3=8
 
-    ANGLE_2=8
-    TEE_2=9
-    CROSS_2=10
+    PIPE_1 = 9
+    PIPE_2 = 10
+    PIPE_3 = 11
+    PIPE_4 = 12
 
-    ANGLE_3=11
-    # TEE_3=12
-    CROSS_3=13
+    # TEE_3=13
 
     # PIPE_5=14
 

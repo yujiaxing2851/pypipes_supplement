@@ -28,8 +28,9 @@ from src.pipeline_constructor.PipelineConstructor import PipelineConstructor
 nb_models = 30
 nb_min_part = 100
 nb_max_part = 500
-nb_points_per_mesh = 128
+nb_points_per_mesh = 1000
 save_path = 'resources/results'
+seg_path='resources/segments'
 
 
 def main(args):
@@ -43,6 +44,8 @@ def main(args):
         file_path = resource_dir / save_path / (str(i) + "_classif.json")
         mesh_path = resource_dir / save_path / (str(i) + "_mesh.ply")
         pcd_path = resource_dir / save_path / (str(i) + "_pcd.ply")
+        npy_path= resource_dir / seg_path / (str(i)+".npy")
+        bin_path= resource_dir / seg_path / (str(i)+".bin")
 
         nb_parts = random.randrange(nb_min_part, nb_max_part)
 
@@ -55,6 +58,7 @@ def main(args):
         model.save_model(str(file_path))
         model.save_mesh(str(mesh_path))
         model.save_pcd(str(pcd_path))
+        model.save_file(str(npy_path),str(bin_path))
         #model.save_graph(_)
 
 if __name__ == '__main__':

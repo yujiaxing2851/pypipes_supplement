@@ -54,6 +54,9 @@ class GraphCreator:
 
         bounding_boxes = [pipeline_constructor.create_mesh_from_part(part).get_axis_aligned_bounding_box()]
 
+        axis=o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+        o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(part),axis])
+
         end_parts = []
 
         for connection in connections:
@@ -66,6 +69,10 @@ class GraphCreator:
 
             bounding_boxes.append(pipeline_constructor.create_mesh_from_part(pipe).get_axis_aligned_bounding_box())
             bounding_boxes.append(pipeline_constructor.create_mesh_from_part(new_part).get_axis_aligned_bounding_box())
+
+            axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0)
+            o3d.visualization.draw_geometries([pipeline_constructor.create_mesh_from_part(pipe),
+                                              pipeline_constructor.create_mesh_from_part(new_part), axis])
 
             if part_index - nb_pipes >= nb_parts:
                 return graph
@@ -81,7 +88,7 @@ class GraphCreator:
 
             next_part = last_part_tuple[0]
             last_connection = last_part_tuple[1]
-
+            # 对于new_part，连接方向与connection反向
             occupied_connection = self.opposite_connection(last_connection)
 
             last_coordinate = next_part.coordinates
@@ -90,6 +97,7 @@ class GraphCreator:
             connections = last_part_type.connections_per_axis()
 
             for connection in connections:
+                # 如果上一个部件进行过旋转，那么其connection会发生变化
                 if (last_direction[1] != 0 and "x" in connection) or \
                         (last_direction[2] != 0 and "y" in connection) or \
                         (last_direction[0] != 0 and "z" in connection):
@@ -163,6 +171,7 @@ class GraphCreator:
         fixed_connection = connection
         destination_connections = destination_part_type.connections_per_axis()
 
+        # 如果两个部件同向，需要旋转180度才能拼接，如果存在反向就不需要旋转
         if connection in destination_connections \
                 and self.opposite_connection(connection) not in destination_connections:
             if "x" in fixed_connection:
@@ -174,6 +183,7 @@ class GraphCreator:
 
         distance_factor = -1 if "-" in fixed_connection else 1
 
+        # 计算管道和部件新的坐标
         if "x" in fixed_connection:
             distance = distance_factor * (by_axis_origin["x"] + (by_axis_pipe["z"] * 2) + by_axis_destination["x"])
             new_part_coordinates[0] = new_part_coordinates[0] + distance

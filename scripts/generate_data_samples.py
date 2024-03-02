@@ -10,7 +10,7 @@
 """
 
 """
-expand 2d generation to 3d space
+# expand 2d generation to 3d space
 """
 
 import sys

@@ -16,6 +16,7 @@ class PartType(Enum):
     PIPE_3 = 6
     PIPE_4 = 7
 
+    # 在各轴上的长度
     def distance_per_axis(self) -> dict:
         if self == self.ANGLE:
             return {'x': 1.21041, 'y': 0.5, 'z': 1.21041}

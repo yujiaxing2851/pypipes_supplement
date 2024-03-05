@@ -25,6 +25,13 @@ def intersects(a: o3d.geometry.AxisAlignedBoundingBox, b: o3d.geometry.AxisAlign
            (a_min[2] + margin <= b_max[2] and a_max[2] >= b_min[2] + margin)
 
 
+def is_elbow(part_type):
+    if part_type.value==1 or part_type.value==2 or part_type.value==3:
+        return True
+    else:
+        return False
+
+
 class GraphCreator:
 
     def __init__(self):
@@ -104,6 +111,7 @@ class GraphCreator:
                 #         (last_direction[2] != 0 and "y" in connection) or \
                 #         (last_direction[0] != 0 and "z" in connection):
                 if anchor in "xyz":
+                    # 沿x轴旋转，yz都需要反向
                     if connection not in anchor:
                         connection = self.opposite_connection(connection)
 
@@ -181,18 +189,26 @@ class GraphCreator:
         destination_connections = destination_part_type.connections_per_axis()
 
         # 如果两个部件同向，需要旋转180度才能拼接，如果存在反向就不需要旋转，但是拐弯也可以转90度
+        # 产生的随机部件一定是同向或者反向，反向不存在，就进行旋转
+        # 如果在x同向的话，对于拐弯来说（三通要么不旋转，要么旋转后效果不变），只有沿y旋转，或者沿z旋转才能使两端反向，并不是沿y、z旋转都可以
         anchor_rotation="none"
-        if connection in destination_connections \
-                and self.opposite_connection(connection) not in destination_connections:
+        index={"x":0,"y":1,"z":2}
+        if self.opposite_connection(connection) not in destination_connections:
             if "x" in fixed_connection:
                 anchor_rotation="y"
-                new_part_direction[1] = np.pi
+                if is_elbow(destination_part_type) and (np.any([anchor_rotation in t for t in destination_connections])):
+                    anchor_rotation="z"
+                new_part_direction[index[anchor_rotation]] = np.pi
             elif "y" in fixed_connection:
                 anchor_rotation="z"
-                new_part_direction[2] = np.pi
+                if is_elbow(destination_part_type) and (np.any([anchor_rotation in t for t in destination_connections])):
+                    anchor_rotation="x"
+                new_part_direction[index[anchor_rotation]] = np.pi
             elif "z" in fixed_connection:
                 anchor_rotation="x"
-                new_part_direction[0] = np.pi
+                if is_elbow(destination_part_type) and (np.any([anchor_rotation in t for t in destination_connections])):
+                    anchor_rotation="y"
+                new_part_direction[index[anchor_rotation]] = np.pi
 
         distance_factor = -1 if "-" in fixed_connection else 1
 

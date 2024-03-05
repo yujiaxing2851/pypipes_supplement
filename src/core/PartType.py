@@ -122,39 +122,39 @@ def as_part_type(d):
 def random_part_type(type) -> PartType:
     if 'x' in type:
         score = random.randrange(0, 120)
-        if 0 <= score < 20:
+        if 0 <= score < 40:
             return PartType.ANGLE
-        elif 20 <= score < 40:
+        elif 40 <= score < 80:
             return PartType.ANGLE_2
-        elif 40 <= score < 60:
+        elif 80 <= score < 90:
             return PartType.TEE
-        elif 60 <= score < 80:
+        elif 90 <= score < 100:
             return PartType.TEE_2
-        elif 80 <= score < 100:
+        elif 100 <= score < 110:
             return PartType.CROSS
-        elif 100 <= score < 120:
+        elif 110 <= score < 120:
             return PartType.CROSS_2
     elif 'y' in type:
         score = random.randrange(0, 100)
-        if 0 <= score < 20:
+        if 0 <= score < 40:
             return PartType.ANGLE_2
-        elif 20 <= score < 40:
+        elif 40 <= score < 80:
             return PartType.ANGLE_3
-        elif 40 <= score < 60:
+        elif 80 <= score < 85:
             return PartType.TEE_2
-        elif 60 <= score < 80:
+        elif 85 <= score < 90:
             return PartType.CROSS_2
-        elif 80 <= score < 100:
+        elif 90 <= score < 100:
             return PartType.CROSS_3
     elif 'z' in type:
         score = random.randrange(0, 100)
-        if 0 <= score < 20:
+        if 0 <= score < 30:
             return PartType.ANGLE
-        elif 20 <= score < 40:
+        elif 30 <= score < 60:
             return PartType.ANGLE_3
-        elif 40 <= score < 60:
+        elif 60 <= score < 70:
             return PartType.TEE
-        elif 60 <= score < 80:
+        elif 70 <= score < 80:
             return PartType.CROSS
         elif 80 <= score < 100:
             return PartType.CROSS_3

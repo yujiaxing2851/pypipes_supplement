@@ -19,8 +19,8 @@ class TrainingModel:
     def __init__(self, pipeline_graph: PipelineGraph = None, nb_points_per_mesh: int = 50,
                  json_file: str = None) -> None:
         resource_dir = pathlib.Path(__file__).parent.parent.parent.parent / "resources" / "3Dmodels"
-        self._point_cloud_model = o3d.io.read_point_cloud(str(resource_dir / "empty.ply"))
-        self._mesh = o3d.io.read_triangle_mesh(str(resource_dir / "empty.ply"))
+        self._point_cloud_model = o3d.geometry.PointCloud()
+        self._mesh = o3d.geometry.TriangleMesh()
 
         self._pipeline_graph = pipeline_graph
 
